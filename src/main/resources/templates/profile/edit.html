@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ của tôi - Music App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="profile-container">
+    <p><a th:href="@{/}">← Về trang chủ</a></p>
+    <h2>Hồ sơ của tôi</h2>
+
+    <p th:if="${successMessage}" class="success-msg" th:text="${successMessage}"></p>
+    <p th:if="${errorMessage}" class="error-msg" th:text="${errorMessage}"></p>
+
+    <div class="form-group">
+        <label>Username</label>
+        <div class="readonly-field" th:text="${user.username}"></div>
+    </div>
+
+    <div class="form-group">
+        <label>Vai trò</label>
+        <div class="readonly-field" th:text="${user.role}"></div>
+    </div>
+
+    <form th:action="@{/profile/edit}" th:object="${updateProfileRequest}" method="post">
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" required>
+            <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Mật khẩu mới (để trống nếu không đổi)</label>
+            <input type="password" th:field="*{newPassword}">
+        </div>
+
+        <div class="form-group">
+            <label>Mật khẩu hiện tại (bắt buộc để xác nhận)</label>
+            <input type="password" th:field="*{currentPassword}" required>
+            <span class="field-error" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></span>
+        </div>
+
+        <button type="submit">Lưu thay đổi</button>
+    </form>
+</div>
+</body>
+</html>

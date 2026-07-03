@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký - Music App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="auth-container">
+    <h2>Đăng ký tài khoản</h2>
+
+    <p th:if="${errorMessage}" class="error-msg" th:text="${errorMessage}"></p>
+
+    <form th:action="@{/auth/register}" th:object="${registerRequest}" method="post">
+        <div class="form-group">
+            <label>Username</label>
+            <input type="text" th:field="*{username}" required>
+            <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" required>
+            <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </div>
+        <div class="form-group">
+            <label>Mật khẩu</label>
+            <input type="password" th:field="*{password}" required>
+            <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+        </div>
+        <button type="submit">Đăng ký</button>
+    </form>
+
+    <p>Đã có tài khoản? <a th:href="@{/auth/login}">Đăng nhập</a></p>
+</div>
+</body>
+</html>

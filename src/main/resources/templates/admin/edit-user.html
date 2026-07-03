@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sửa người dùng - Music Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="admin-body">
+
+<div th:replace="~{admin/fragments :: sidebar('users')}"></div>
+
+<main class="admin-main">
+    <div th:replace="~{admin/fragments :: topbar('Sửa người dùng')}"></div>
+
+    <a th:href="@{/admin/users}" class="back-link">← Quay lại danh sách</a>
+
+    <p th:if="${errorMessage}" class="admin-alert admin-alert-error" th:text="${errorMessage}"></p>
+
+    <div class="admin-form-card">
+        <form th:action="@{/admin/users/{id}/edit(id=${targetUser.id})}" th:object="${adminUpdateUserRequest}" method="post">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" th:field="*{username}">
+                <span class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" th:field="*{email}">
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+            </div>
+
+            <div class="form-group">
+                <label>Role</label>
+                <select th:field="*{role}">
+                    <option value="USER">USER</option>
+                    <option value="ADMIN">ADMIN</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" th:field="*{enabled}">
+                    Tài khoản đang hoạt động (bỏ tick = khóa tài khoản)
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary-solid">Lưu thay đổi</button>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

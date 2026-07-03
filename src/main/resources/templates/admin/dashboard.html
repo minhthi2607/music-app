@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Music Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="admin-body">
+
+<div th:replace="~{admin/fragments :: sidebar('dashboard')}"></div>
+
+<main class="admin-main">
+    <div th:replace="~{admin/fragments :: topbar('Dashboard')}"></div>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-icon violet">👥</div>
+            <div class="stat-value" th:text="${totalUsers}"></div>
+            <div class="stat-label">Tổng số người dùng</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">🛡️</div>
+            <div class="stat-value" th:text="${totalAdmins}"></div>
+            <div class="stat-label">Quản trị viên</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div class="stat-value" th:text="${activeUsers}"></div>
+            <div class="stat-label">Tài khoản hoạt động</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon red">🔒</div>
+            <div class="stat-value" th:text="${lockedUsers}"></div>
+            <div class="stat-label">Tài khoản bị khóa</div>
+        </div>
+    </div>
+
+    <div class="admin-panel">
+        <h3>Người dùng đăng ký gần đây</h3>
+        <div class="admin-table-wrapper">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${recentUsers}">
+                    <td th:text="${user.username}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td>
+                        <span class="badge" th:classappend="${user.role.name() == 'ADMIN'} ? 'badge-admin' : 'badge-user'"
+                              th:text="${user.role}"></span>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${user.enabled} ? 'badge-active' : 'badge-locked'"
+                              th:text="${user.enabled} ? 'Hoạt động' : 'Đã khóa'"></span>
+                    </td>
+                    <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(recentUsers)}">
+                    <td colspan="5">Chưa có người dùng nào.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top:16px;">
+            <a th:href="@{/admin/users}" class="btn btn-primary-solid">Xem toàn bộ người dùng →</a>
+        </p>
+    </div>
+
+    <div class="admin-panel">
+        <h3>Sắp tới</h3>
+        <p style="color: var(--text-secondary); font-size: 14px;">
+            Thống kê Bài hát và Playlist sẽ hiện ở đây khi 2 module đó hoàn thành.
+        </p>
+    </div>
+</main>
+
+</body>
+</html>

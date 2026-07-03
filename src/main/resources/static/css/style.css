@@ -1,0 +1,188 @@
+body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    background: #121212;
+    color: #eee;
+    margin: 0;
+    padding: 40px 20px;
+}
+
+.auth-container, .home-container {
+    max-width: 400px;
+    margin: 0 auto;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.page-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e1e1e;
+    padding: 16px 24px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.navbar .logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.nav-links a {
+    margin-left: 14px;
+    text-decoration: none;
+}
+
+.nav-links a:hover {
+    text-decoration: underline;
+}
+
+.hint {
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.song-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.song-card {
+    background: #1e1e1e;
+    border-radius: 8px;
+    padding: 16px;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.song-card:hover {
+    background: #262626;
+    transform: translateY(-3px);
+}
+
+.song-cover {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #1db954, #14532d);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
+    margin-bottom: 10px;
+}
+
+.song-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-artist {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-genre {
+    display: inline-block;
+    background: #2a2a2a;
+    color: #1db954;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+}
+
+.profile-container {
+    max-width: 450px;
+    margin: 0 auto;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.readonly-field {
+    background: #2a2a2a;
+    padding: 8px;
+    border-radius: 4px;
+    color: #999;
+}
+
+.admin-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: #eee;
+}
+
+button {
+    background: #1db954;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 2px;
+}
+
+button:hover {
+    background: #17a94a;
+}
+
+a {
+    color: #1db954;
+}
+
+.error-msg {
+    color: #ff5c5c;
+}
+
+.success-msg {
+    color: #1db954;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+    font-size: 14px;
+}

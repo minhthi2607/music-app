@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!--/* Sidebar - tham so 'active' de highlight muc menu dang chon (dashboard | users) */-->
+<aside th:fragment="sidebar(active)" class="admin-sidebar">
+    <div class="sidebar-logo">
+        <span class="logo-mark">🎵</span>
+        <span class="logo-text">Music<strong>Admin</strong></span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <p class="nav-section-label">Tổng quan</p>
+        <a th:href="@{/admin/dashboard}" class="nav-item" th:classappend="${active == 'dashboard'} ? 'active'">
+            <span class="nav-icon">📊</span> Dashboard
+        </a>
+
+        <p class="nav-section-label">Quản lý</p>
+        <a th:href="@{/admin/users}" class="nav-item" th:classappend="${active == 'users'} ? 'active'">
+            <span class="nav-icon">👥</span> Người dùng
+        </a>
+        <span class="nav-item disabled">
+            <span class="nav-icon">🎧</span> Bài hát <span class="soon-badge">Sắp có</span>
+        </span>
+        <span class="nav-item disabled">
+            <span class="nav-icon">📁</span> Playlist <span class="soon-badge">Sắp có</span>
+        </span>
+
+        <p class="nav-section-label">Tài khoản</p>
+        <a th:href="@{/profile}" class="nav-item">
+            <span class="nav-icon">⚙️</span> Hồ sơ của tôi
+        </a>
+        <a th:href="@{/}" class="nav-item">
+            <span class="nav-icon">🏠</span> Về trang chủ
+        </a>
+        <a th:href="@{/auth/logout}" class="nav-item nav-item-logout">
+            <span class="nav-icon">🚪</span> Đăng xuất
+        </a>
+    </nav>
+</aside>
+
+<!--/* Topbar - hien thi tren moi trang admin */-->
+<header th:fragment="topbar(pageTitle)" class="admin-topbar">
+    <h1 class="page-title" th:text="${pageTitle}"></h1>
+    <div class="topbar-right">
+        <span class="topbar-role-badge">ADMIN</span>
+        <span class="topbar-username" sec:authentication="name"></span>
+        <div class="topbar-avatar" th:text="${#strings.toUpperCase(#strings.substring(#authentication.name,0,1))}"></div>
+    </div>
+</header>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Music App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page-container">
+
+    <nav class="navbar">
+        <span class="logo">🎵 Music App</span>
+        <div class="nav-links">
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/auth/login}">Đăng nhập</a>
+                <a th:href="@{/auth/register}">Đăng ký</a>
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <span>Xin chào, <span sec:authentication="name"></span></span>
+                <a th:href="@{/profile}">Hồ sơ</a>
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}">Quản trị</a>
+                <a th:href="@{/auth/logout}">Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <h2>Bài hát nổi bật</h2>
+        <p class="hint"><em>Dữ liệu mẫu (hardcode) để demo giao diện — sẽ được thay bằng dữ liệu thật khi module Song hoàn thành.</em></p>
+
+        <div class="song-grid">
+            <div class="song-card" th:each="song : ${songs}">
+                <div class="song-cover" th:text="${song.coverEmoji()}"></div>
+                <div class="song-info">
+                    <div class="song-title" th:text="${song.title()}"></div>
+                    <div class="song-artist" th:text="${song.artist()}"></div>
+                    <span class="song-genre" th:text="${song.genre()}"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div>
+</body>
+</html>
