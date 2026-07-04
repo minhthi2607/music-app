@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sửa bài hát</title>
+</head>
+<body>
+
+<h1>Sửa bài hát</h1>
+
+<form th:action="@{/songs/update/{id}(id=${song.id})}"
+      method="post"
+      enctype="multipart/form-data">
+
+    <p>Tên bài hát</p>
+    <input type="text"
+           name="title"
+           th:value="${song.title}">
+
+    <br><br>
+
+    <p>Ca sĩ</p>
+    <input type="text"
+           name="artist"
+           th:value="${song.artist}">
+
+    <br><br>
+
+    <p>Thể loại</p>
+
+    <select name="category.id">
+
+        <option th:each="c : ${categories}"
+                th:value="${c.id}"
+                th:text="${c.name}"
+                th:selected="${song.category != null and song.category.id == c.id}">
+        </option>
+
+    </select>
+
+    <br><br>
+
+    <p>Ảnh bìa hiện tại</p>
+
+    <img th:if="${song.coverUrl != null}"
+         th:src="${song.coverUrl}"
+         width="200">
+
+    <br><br>
+
+    <p>Đổi ảnh bìa (không bắt buộc)</p>
+
+    <input type="file" name="coverFile">
+
+    <br><br>
+
+    <p>Đổi file MP3 (không bắt buộc)</p>
+
+    <input type="file" name="audioFile">
+
+    <br><br>
+
+    <button type="submit">
+        💾 Lưu thay đổi
+    </button>
+
+</form>
+
+<br>
+
+<a href="/songs">⬅ Quay lại</a>
+
+</body>
+</html>

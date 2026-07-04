@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thêm bài hát</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-8">
+
+            <div class="card shadow">
+
+                <div class="card-header bg-primary text-white">
+                    <h3>🎵 Thêm bài hát mới</h3>
+                </div>
+
+                <div class="card-body">
+
+                    <form th:action="@{/songs/upload}"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên bài hát</label>
+                            <input type="text"
+                                   name="title"
+                                   class="form-control"
+                                   required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ca sĩ</label>
+                            <input type="text"
+                                   name="artist"
+                                   class="form-control">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Thể loại</label>
+
+                            <select name="category.id"
+                                    class="form-select">
+
+                                <option th:each="c : ${categories}"
+                                        th:value="${c.id}"
+                                        th:text="${c.name}">
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">File MP3</label>
+
+                            <input type="file"
+                                   name="audioFile"
+                                   class="form-control"
+                                   accept=".mp3"
+                                   required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Ảnh bìa</label>
+
+                            <input type="file"
+                                   name="coverFile"
+                                   class="form-control"
+                                   accept="image/*">
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+
+                            <a href="/songs"
+                               class="btn btn-secondary">
+                                ← Quay lại
+                            </a>
+
+                            <button class="btn btn-success">
+                                Lưu bài hát
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
