@@ -1,25 +1,24 @@
 package com.code.musicapp.controller;
 
 import com.code.musicapp.entity.Song;
+import com.code.musicapp.entity.User;
+import com.code.musicapp.exception.ResourceNotFoundException;
+import com.code.musicapp.repository.CategoryRepository;
 import com.code.musicapp.repository.SongRepository;
+import com.code.musicapp.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import com.code.musicapp.repository.CategoryRepository;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
-import java.util.List;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Controller
@@ -29,6 +28,11 @@ public class SongController {
 
     private final SongRepository songRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+
+    // Chi chap nhan cac dinh dang nay khi upload, tranh nguoi dung day file .exe/.php doi ten thanh .mp3
+    private static final Set<String> ALLOWED_AUDIO_TYPES = Set.of("audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg");
+    private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
 
     @GetMapping
     public String listSongs(
@@ -40,10 +44,7 @@ public class SongController {
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             songs = songRepository
-                    .findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(
-                            keyword,
-                            keyword
-                    );
+                    .findByTitleContainingIgnoreCaseOrArtistContainingIgnoreCase(keyword, keyword);
         } else if (categoryId != null) {
             songs = songRepository.findByCategoryId(categoryId);
         } else {
@@ -57,165 +58,162 @@ public class SongController {
 
         return "songs/list";
     }
+
     @GetMapping("/detail/{id}")
     public String detail(@PathVariable Long id, Model model) {
-
         Song song = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
         model.addAttribute("song", song);
-
         return "songs/detail";
     }
+
     @GetMapping("/upload")
     public String uploadForm(Model model) {
-
         model.addAttribute("song", new Song());
         model.addAttribute("categories", categoryRepository.findAll());
-
         return "songs/upload";
     }
+
     @PostMapping("/upload")
     public String uploadSong(
-            @ModelAttribute Song song,
+            @Valid @ModelAttribute Song song,
+            BindingResult bindingResult,
             @RequestParam("audioFile") MultipartFile audioFile,
-            @RequestParam("coverFile") MultipartFile coverFile
+            @RequestParam("coverFile") MultipartFile coverFile,
+            Model model
     ) throws IOException {
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "songs/upload";
+        }
+
+        if (audioFile.isEmpty() || !ALLOWED_AUDIO_TYPES.contains(audioFile.getContentType())) {
+            bindingResult.reject("invalidAudio", "File nhac phai la mp3/wav/ogg");
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "songs/upload";
+        }
+        if (!coverFile.isEmpty() && !ALLOWED_IMAGE_TYPES.contains(coverFile.getContentType())) {
+            bindingResult.reject("invalidCover", "Anh bia phai la jpg/png/webp");
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "songs/upload";
+        }
 
         File audioDir = new File(System.getProperty("user.dir") + "/uploads/audio");
         if (!audioDir.exists()) {
             audioDir.mkdirs();
         }
-
         File imageDir = new File(System.getProperty("user.dir") + "/uploads/images");
         if (!imageDir.exists()) {
             imageDir.mkdirs();
         }
 
-        if (!audioFile.isEmpty()) {
-            String audioName = UUID.randomUUID() + "_" + audioFile.getOriginalFilename();
-
-            File audioPath = new File(audioDir, audioName);
-            audioFile.transferTo(audioPath);
-
-            song.setFileUrl("/uploads/audio/" + audioName);
-        }
+        String audioName = UUID.randomUUID() + "_" + audioFile.getOriginalFilename();
+        audioFile.transferTo(new File(audioDir, audioName));
+        song.setFileUrl("/uploads/audio/" + audioName);
 
         if (!coverFile.isEmpty()) {
             String imageName = UUID.randomUUID() + "_" + coverFile.getOriginalFilename();
-
-            File imagePath = new File(imageDir, imageName);
-            coverFile.transferTo(imagePath);
-
+            coverFile.transferTo(new File(imageDir, imageName));
             song.setCoverUrl("/uploads/images/" + imageName);
         }
 
-        songRepository.save(song);
+        // Gan nguoi dang upload - truoc day field nay luon bi bo trong (null)
+        song.setUploader(getCurrentUser());
 
+        songRepository.save(song);
         return "redirect:/songs";
     }
-    @GetMapping("/delete/{id}")
-    public String deleteSong(@PathVariable Long id) {
 
+    @PostMapping("/delete/{id}")
+    public String deleteSong(@PathVariable Long id) {
         Song song = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
         if (song.getFileUrl() != null) {
-            File audioFile = new File(System.getProperty("user.dir") + song.getFileUrl());
-            if (audioFile.exists()) {
-                audioFile.delete();
-            }
+            new File(System.getProperty("user.dir") + song.getFileUrl()).delete();
         }
-
         if (song.getCoverUrl() != null) {
-            File coverFile = new File(System.getProperty("user.dir") + song.getCoverUrl());
-            if (coverFile.exists()) {
-                coverFile.delete();
-            }
+            new File(System.getProperty("user.dir") + song.getCoverUrl()).delete();
         }
 
         songRepository.delete(song);
-
         return "redirect:/songs";
     }
+
     @GetMapping("/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-
         Song song = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
         model.addAttribute("song", song);
         model.addAttribute("categories", categoryRepository.findAll());
-
         return "songs/edit";
     }
+
     @PostMapping("/update/{id}")
     public String updateSong(
             @PathVariable Long id,
-            @ModelAttribute Song updatedSong,
+            @Valid @ModelAttribute("song") Song updatedSong,
+            BindingResult bindingResult,
             @RequestParam("audioFile") MultipartFile audioFile,
-            @RequestParam("coverFile") MultipartFile coverFile
+            @RequestParam("coverFile") MultipartFile coverFile,
+            Model model
     ) throws IOException {
 
         Song song = songRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Song not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
-        // Cập nhật thông tin cơ bản
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("categories", categoryRepository.findAll());
+            return "songs/edit";
+        }
+
         song.setTitle(updatedSong.getTitle());
         song.setArtist(updatedSong.getArtist());
         song.setCategory(updatedSong.getCategory());
 
-        // ==========================
-        // Cập nhật file MP3 nếu có
-        // ==========================
         if (!audioFile.isEmpty()) {
-
-            // Xóa file cũ
+            if (!ALLOWED_AUDIO_TYPES.contains(audioFile.getContentType())) {
+                bindingResult.reject("invalidAudio", "File nhac phai la mp3/wav/ogg");
+                model.addAttribute("categories", categoryRepository.findAll());
+                return "songs/edit";
+            }
             if (song.getFileUrl() != null) {
-                File oldAudio = new File(System.getProperty("user.dir") + song.getFileUrl());
-                if (oldAudio.exists()) {
-                    oldAudio.delete();
-                }
+                new File(System.getProperty("user.dir") + song.getFileUrl()).delete();
             }
-
             String audioName = UUID.randomUUID() + "_" + audioFile.getOriginalFilename();
-
             File audioDir = new File(System.getProperty("user.dir") + "/uploads/audio");
-            if (!audioDir.exists()) {
-                audioDir.mkdirs();
-            }
-
+            if (!audioDir.exists()) audioDir.mkdirs();
             audioFile.transferTo(new File(audioDir, audioName));
-
             song.setFileUrl("/uploads/audio/" + audioName);
         }
 
-        // ==========================
-        // Cập nhật ảnh bìa nếu có
-        // ==========================
         if (!coverFile.isEmpty()) {
-
+            if (!ALLOWED_IMAGE_TYPES.contains(coverFile.getContentType())) {
+                bindingResult.reject("invalidCover", "Anh bia phai la jpg/png/webp");
+                model.addAttribute("categories", categoryRepository.findAll());
+                return "songs/edit";
+            }
             if (song.getCoverUrl() != null) {
-                File oldCover = new File(System.getProperty("user.dir") + song.getCoverUrl());
-                if (oldCover.exists()) {
-                    oldCover.delete();
-                }
+                new File(System.getProperty("user.dir") + song.getCoverUrl()).delete();
             }
-
             String imageName = UUID.randomUUID() + "_" + coverFile.getOriginalFilename();
-
             File imageDir = new File(System.getProperty("user.dir") + "/uploads/images");
-            if (!imageDir.exists()) {
-                imageDir.mkdirs();
-            }
-
+            if (!imageDir.exists()) imageDir.mkdirs();
             coverFile.transferTo(new File(imageDir, imageName));
-
             song.setCoverUrl("/uploads/images/" + imageName);
         }
 
         songRepository.save(song);
-
         return "redirect:/songs";
+    }
+
+    // Lay User dang dang nhap tu SecurityContext (dua tren username trong JWT)
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay user dang dang nhap: " + username));
     }
 }

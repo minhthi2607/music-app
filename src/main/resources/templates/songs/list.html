@@ -133,13 +133,10 @@
 
                         </a>
 
-                        <a th:href="@{/songs/delete/{id}(id=${song.id})}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Bạn có chắc muốn xóa bài hát này không?')">
-
-                            Xóa
-
-                        </a>
+                        <form th:action="@{/songs/delete/{id}(id=${song.id})}" method="post" style="display:inline"
+                              onsubmit="return confirm('Xoá bài hát này?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Xoá</button>
+                        </form>
 
                     </td>
 
