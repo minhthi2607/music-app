@@ -43,11 +43,10 @@
                            class="btn btn-warning btn-sm">
                             Sửa
                         </a>
-                        <a th:href="@{/categories/delete/{id}(id=${category.id})}"
-                           class="btn btn-danger btn-sm"
-                           onclick="return confirm('Bạn có chắc muốn xóa thể loại này không?')">
-                            Xóa
-                        </a>
+                        <form th:action="@{/categories/delete/{id}(id=${category.id})}" method="post" style="display:inline"
+                              onsubmit="return confirm('Xoá thể loại này?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Xoá</button>
+                        </form>
 
                     </td>
                 </tr>

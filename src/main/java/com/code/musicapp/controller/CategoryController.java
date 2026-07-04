@@ -1,10 +1,14 @@
 package com.code.musicapp.controller;
 
 import com.code.musicapp.entity.Category;
+import com.code.musicapp.exception.ResourceNotFoundException;
 import com.code.musicapp.repository.CategoryRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -14,56 +18,61 @@ public class CategoryController {
 
     private final CategoryRepository categoryRepository;
 
-    // Danh sách thể loại
     @GetMapping
     public String listCategories(Model model) {
         model.addAttribute("categories", categoryRepository.findAll());
         return "categories/list";
     }
 
-    // Hiển thị form thêm
     @GetMapping("/create")
+    @PreAuthorize("hasRole('ADMIN')")
     public String createForm(Model model) {
         model.addAttribute("category", new Category());
         return "categories/create";
     }
 
-    // Lưu thể loại mới
     @PostMapping("/create")
-    public String createCategory(@ModelAttribute Category category) {
-
+    @PreAuthorize("hasRole('ADMIN')")
+    public String createCategory(@Valid @ModelAttribute Category category, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "categories/create";
+        }
         categoryRepository.save(category);
-
         return "redirect:/categories";
     }
-    @GetMapping("/delete/{id}")
+
+    @PostMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteCategory(@PathVariable Long id) {
-
+        if (!categoryRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Khong tim thay the loai id=" + id);
+        }
         categoryRepository.deleteById(id);
-
         return "redirect:/categories";
     }
+
     @GetMapping("/edit/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String editForm(@PathVariable Long id, Model model) {
-
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay the loai id=" + id));
         model.addAttribute("category", category);
-
         return "categories/edit";
     }
+
     @PostMapping("/update/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String updateCategory(@PathVariable Long id,
-                                 @ModelAttribute Category updatedCategory) {
-
+                                 @Valid @ModelAttribute Category updatedCategory,
+                                 BindingResult bindingResult) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay the loai id=" + id));
 
+        if (bindingResult.hasErrors()) {
+            return "categories/edit";
+        }
         category.setName(updatedCategory.getName());
-
         categoryRepository.save(category);
-
         return "redirect:/categories";
     }
 }
