@@ -67,6 +67,8 @@ public class SecurityConfig {
 
                         // Khu vuc rieng cho ADMIN
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/users/**").hasRole("ADMIN")
                         // Khu vuc can dang nhap (USER hoac ADMIN deu duoc)
                         .requestMatchers("/playlists/**", "/profile/**").authenticated()
                         // Con lai mac dinh cho phep, cac module khac (Playlist cua nguoi 3) se tu sua lai matcher rieng

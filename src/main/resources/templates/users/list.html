@@ -50,13 +50,13 @@
                     </td>
                     <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
                     <td>
-                        <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-edit">Sửa</a>
+                        <a th:href="@{/users/{id}/edit(id=${user.id})}" class="btn btn-edit">Sửa</a>
 
-                        <form th:action="@{/admin/users/{id}/toggle-enabled(id=${user.id})}" method="post" style="display:inline">
+                        <form th:action="@{/users/{id}/toggle-enabled(id=${user.id})}" method="post" style="display:inline">
                             <button type="submit" class="btn btn-toggle" th:text="${user.enabled} ? 'Khóa' : 'Mở khóa'"></button>
                         </form>
 
-                        <form th:action="@{/admin/users/{id}/change-role(id=${user.id})}" method="post" style="display:inline">
+                        <form th:action="@{/users/{id}/change-role(id=${user.id})}" method="post" style="display:inline">
                             <select name="role">
                                 <option value="USER" th:selected="${user.role.name() == 'USER'}">USER</option>
                                 <option value="ADMIN" th:selected="${user.role.name() == 'ADMIN'}">ADMIN</option>
@@ -64,7 +64,7 @@
                             <button type="submit" class="btn btn-role">Đổi role</button>
                         </form>
 
-                        <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" style="display:inline"
+                        <form th:action="@{/users/{id}/delete(id=${user.id})}" method="post" style="display:inline"
                               onsubmit="return confirm('Xác nhận xóa user này?');">
                             <button type="submit" class="btn btn-delete">Xóa</button>
                         </form>

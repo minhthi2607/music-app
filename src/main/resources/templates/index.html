@@ -18,7 +18,7 @@
             <div sec:authorize="isAuthenticated()">
                 <span>Xin chào, <span sec:authentication="name"></span></span>
                 <a th:href="@{/profile}">Hồ sơ</a>
-                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/users}">Quản trị</a>
+                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Quản trị</a>
                 <a th:href="@{/auth/logout}">Đăng xuất</a>
             </div>
         </div>

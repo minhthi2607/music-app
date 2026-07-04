@@ -14,12 +14,12 @@
 <main class="admin-main">
     <div th:replace="~{admin/fragments :: topbar('Sửa người dùng')}"></div>
 
-    <a th:href="@{/admin/users}" class="back-link">← Quay lại danh sách</a>
+    <a th:href="@{/users}" class="back-link">← Quay lại danh sách</a>
 
     <p th:if="${errorMessage}" class="admin-alert admin-alert-error" th:text="${errorMessage}"></p>
 
     <div class="admin-form-card">
-        <form th:action="@{/admin/users/{id}/edit(id=${targetUser.id})}" th:object="${adminUpdateUserRequest}" method="post">
+        <form th:action="@{/users/{id}/edit(id=${targetUser.id})}" th:object="${adminUpdateUserRequest}" method="post">
             <div class="form-group">
                 <label>Username</label>
                 <input type="text" th:field="*{username}">
