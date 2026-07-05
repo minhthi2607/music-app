@@ -8,12 +8,14 @@ import com.code.musicapp.repository.SongRepository;
 import com.code.musicapp.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.code.musicapp.repository.PlaylistRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +31,7 @@ public class SongController {
     private final SongRepository songRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final PlaylistRepository playlistRepository;
 
     // Chi chap nhan cac dinh dang nay khi upload, tranh nguoi dung day file .exe/.php doi ten thanh .mp3
     private static final Set<String> ALLOWED_AUDIO_TYPES = Set.of("audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg");
@@ -55,6 +58,7 @@ public class SongController {
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategoryId", categoryId);
+        addMyPlaylistsToModel(authentication, model);
 
         return "songs/list";
     }
@@ -65,7 +69,17 @@ public class SongController {
                 .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
         model.addAttribute("song", song);
+        addMyPlaylistsToModel(authentication, model);
         return "songs/detail";
+    }
+
+    private void addMyPlaylistsToModel(Authentication authentication, Model model) {
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())) {
+            userRepository.findByUsername(authentication.getName())
+                    .ifPresent(user -> model.addAttribute("myPlaylists",
+                            playlistRepository.findByOwnerIdOrderByCreatedAtDesc(user.getId())));
+        }
     }
 
     @GetMapping("/upload")
