@@ -4,6 +4,7 @@ import com.code.musicapp.entity.Song;
 import com.code.musicapp.entity.User;
 import com.code.musicapp.exception.ResourceNotFoundException;
 import com.code.musicapp.repository.CategoryRepository;
+import com.code.musicapp.repository.PlaylistRepository;
 import com.code.musicapp.repository.SongRepository;
 import com.code.musicapp.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -15,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.code.musicapp.repository.PlaylistRepository;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +41,7 @@ public class SongController {
     public String listSongs(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
+            Authentication authentication,
             Model model
     ) {
         List<Song> songs;
@@ -64,7 +65,7 @@ public class SongController {
     }
 
     @GetMapping("/detail/{id}")
-    public String detail(@PathVariable Long id, Model model) {
+    public String detail(@PathVariable Long id, Authentication authentication, Model model) {
         Song song = songRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay bai hat id=" + id));
 
@@ -73,6 +74,8 @@ public class SongController {
         return "songs/detail";
     }
 
+    // Dua danh sach playlist cua user dang dang nhap vao model, de render modal "+ them vao playlist".
+    // Neu chua dang nhap thi khong them gi ca (modal se khong hien nut chon playlist co san).
     private void addMyPlaylistsToModel(Authentication authentication, Model model) {
         if (authentication != null && authentication.isAuthenticated()
                 && !"anonymousUser".equals(authentication.getPrincipal())) {
