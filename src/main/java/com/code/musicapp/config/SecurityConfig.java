@@ -51,28 +51,29 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // dang dung JWT qua cookie, khong dung session-based form -> tam tat CSRF cho don gian trong scope demo
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Tai nguyen tinh + trang public
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                        .requestMatchers("/", "/auth/**").permitAll()
+                                // Tai nguyen tinh + trang public
+                                .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
+                                .requestMatchers("/", "/auth/**").permitAll()
 
-                        // Song: XEM/NGHE la public, con TAO/SUA/XOA bat buoc dang nhap
-                        .requestMatchers(HttpMethod.GET, "/songs", "/songs/detail/**").permitAll()
-                        .requestMatchers("/songs/upload", "/songs/edit/**", "/songs/delete/**", "/songs/update/**")
-                        .authenticated()
+                                // Song: XEM/NGHE la public, con TAO/SUA/XOA bat buoc dang nhap//
+//                                .requestMatchers(HttpMethod.GET, "/songs", "/songs/detail/**").permitAll()
+//
 
-                        // Category: XEM la public, quan ly thi loai chi ADMIN
-                        .requestMatchers(HttpMethod.GET, "/categories").permitAll()
-                        .requestMatchers("/categories/create", "/categories/edit/**",
-                                "/categories/delete/**", "/categories/update/**").hasRole("ADMIN")
+                                // Category: XEM la public, quan ly thi loai chi ADMIN
+//                        .requestMatchers(HttpMethod.GET, "/categories").permitAll()
+//                        .requestMatchers("/categories/create", "/categories/edit/**",
+//                                "/categories/delete/**", "/categories/update/**").hasRole("ADMIN")
+//                                .requestMatchers("/songs/upload", "/songs/edit/**", "/songs/delete/**", "/songs/update/**").authenticated()
 
-                        // Khu vuc rieng cho ADMIN
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                        .requestMatchers("/users/**").hasRole("ADMIN")
-                        // Khu vuc can dang nhap (USER hoac ADMIN deu duoc)
-                        .requestMatchers("/playlists/**", "/profile/**").authenticated()
-                        // Con lai mac dinh cho phep, cac module khac (Playlist cua nguoi 3) se tu sua lai matcher rieng
-                        .anyRequest().permitAll()
+                                // Khu vuc rieng cho ADMIN
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/categories/**").hasRole("ADMIN")
+                                .requestMatchers("/songs/**").hasRole("ADMIN")
+                                .requestMatchers("/users/**").hasRole("ADMIN")
+                                // Khu vuc can dang nhap (USER hoac ADMIN deu duoc)
+                                .requestMatchers("/playlists/**", "/profile/**").authenticated()
+                                // Con lai mac dinh cho phep, cac module khac (Playlist cua nguoi 3) se tu sua lai matcher rieng
+                                .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider())

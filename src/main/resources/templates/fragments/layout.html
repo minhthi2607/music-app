@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!--/* Navbar dùng chung cho toàn bộ trang public: trang chủ, bài hát, thể loại, hồ sơ.
+       Tham số 'active' để tô đậm mục đang chọn: home | songs | categories | profile */-->
+<nav th:fragment="navbar(active)" class="navbar">
+    <a th:href="@{/}" class="logo" style="color: inherit;">🎵 Music App</a>
+    <div class="nav-links">
+        <div sec:authorize="!isAuthenticated()">
+<!--            <a th:href="@{/songs}">Bài hát</a>-->
+<!--            <a th:href="@{/categories}">Thể loại</a>-->
+            <a th:href="@{/auth/login}">Đăng nhập</a>
+            <a th:href="@{/auth/register}" class="nav-cta">Đăng ký</a>
+        </div>
+        <div sec:authorize="isAuthenticated()">
+<!--            <a sec:authorize="hasRole('ADMIN')" th:href="@{/songs}">Bài hát</a>-->
+<!--            <a sec:authorize="hasRole('ADMIN')" th:href="@{/categories}">Thể loại</a>-->
+            <a th:href="@{/profile}">Hồ sơ</a>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Quản trị</a>
+            <span class="nav-greeting">Xin chào, <strong sec:authentication="name"></strong></span>
+            <a th:href="@{/auth/logout}">Đăng xuất</a>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

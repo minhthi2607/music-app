@@ -1,73 +1,67 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Sửa bài hát</title>
+    <meta charset="UTF-8">
+    <title>Sửa bài hát - Music App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
-<body>
+<body class="admin-body">
 
-<h1>Sửa bài hát</h1>
+<div th:replace="~{admin/fragments :: sidebar('songs')}"></div>
 
-<form th:action="@{/songs/update/{id}(id=${song.id})}"
-      method="post"
-      enctype="multipart/form-data">
+<main class="admin-main">
+    <div th:replace="~{admin/fragments :: topbar('Sửa bài hát')}"></div>
 
-    <p>Tên bài hát</p>
-    <input type="text"
-           name="title"
-           th:value="${song.title}">
+    <a th:href="@{/songs}" class="back-link">← Quay lại danh sách bài hát</a>
 
-    <br><br>
 
-    <p>Ca sĩ</p>
-    <input type="text"
-           name="artist"
-           th:value="${song.artist}">
 
-    <br><br>
+    <div class="admin-form-card">
+        <form th:action="@{/songs/update/{id}(id=${song.id})}" th:object="${song}" method="post" enctype="multipart/form-data">
+            <p th:if="${#fields != null and #fields.hasErrors('*')}" class="admin-alert admin-alert-error">Vui lòng kiểm tra lại thông tin bên dưới.</p>
+            <div class="form-group">
+                <label>Tên bài hát</label>
+                <input type="text" th:field="*{title}">
+                <span class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></span>
+            </div>
 
-    <p>Thể loại</p>
+            <div class="form-group">
+                <label>Ca sĩ</label>
+                <input type="text" th:field="*{artist}">
+            </div>
 
-    <select name="category.id">
+            <div class="form-group">
+                <label>Thể loại</label>
+                <select name="category.id">
+                    <option th:each="c : ${categories}"
+                            th:value="${c.id}"
+                            th:text="${c.name}"
+                            th:selected="${song.category != null and song.category.id == c.id}">
+                    </option>
+                </select>
+            </div>
 
-        <option th:each="c : ${categories}"
-                th:value="${c.id}"
-                th:text="${c.name}"
-                th:selected="${song.category != null and song.category.id == c.id}">
-        </option>
+            <div class="form-group" th:if="${song.coverUrl != null}">
+                <label>Ảnh bìa hiện tại</label>
+                <img th:src="${song.coverUrl}" class="track-cover" style="width:100px;height:100px;">
+            </div>
 
-    </select>
+            <div class="form-group">
+                <label>Đổi ảnh bìa (không bắt buộc)</label>
+                <input type="file" name="coverFile" accept="image/*">
+            </div>
 
-    <br><br>
+            <div class="form-group">
+                <label>Đổi file MP3 (không bắt buộc)</label>
+                <input type="file" name="audioFile" accept=".mp3">
+            </div>
 
-    <p>Ảnh bìa hiện tại</p>
-
-    <img th:if="${song.coverUrl != null}"
-         th:src="${song.coverUrl}"
-         width="200">
-
-    <br><br>
-
-    <p>Đổi ảnh bìa (không bắt buộc)</p>
-
-    <input type="file" name="coverFile">
-
-    <br><br>
-
-    <p>Đổi file MP3 (không bắt buộc)</p>
-
-    <input type="file" name="audioFile">
-
-    <br><br>
-
-    <button type="submit">
-        💾 Lưu thay đổi
-    </button>
-
-</form>
-
-<br>
-
-<a href="/songs">⬅ Quay lại</a>
+            <button type="submit" class="btn btn-primary-solid">💾 Lưu thay đổi</button>
+        </form>
+    </div>
+</main>
 
 </body>
 </html>
