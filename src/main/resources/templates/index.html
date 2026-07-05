@@ -3,43 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <title>Music App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="page-container">
 
-    <nav class="navbar">
-        <span class="logo">🎵 Music App</span>
-        <div class="nav-links">
-            <div sec:authorize="!isAuthenticated()">
-                <a th:href="@{/auth/login}">Đăng nhập</a>
-                <a th:href="@{/auth/register}">Đăng ký</a>
-            </div>
-            <div sec:authorize="isAuthenticated()">
-                <span>Xin chào, <span sec:authentication="name"></span></span>
-                <a th:href="@{/profile}">Hồ sơ</a>
-                <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Quản trị</a>
-                <a th:href="@{/auth/logout}">Đăng xuất</a>
-            </div>
-        </div>
-    </nav>
+    <div th:replace="~{fragments/layout :: navbar('home')}"></div>
 
     <main>
-        <h2>Bài hát nổi bật</h2>
-        <p class="hint"><em>Dữ liệu mẫu (hardcode) để demo giao diện — sẽ được thay bằng dữ liệu thật khi module Song hoàn thành.</em></p>
+        <div class="page-header">
+            <div>
+                <h1>Bài hát nổi bật</h1>
+                <p class="page-subtitle">Những bài hát mới được thêm gần đây.</p>
+            </div>
+<!--            <a th:href="@{/songs}" class="btn btn-secondary">Xem tất cả bài hát →</a>-->
+        </div>
 
-        <div class="song-grid">
+        <div class="song-grid" th:if="${not #lists.isEmpty(songs)}">
             <div class="song-card" th:each="song : ${songs}">
-                <div class="song-cover" th:text="${song.coverEmoji()}"></div>
+                <div class="song-cover">
+                    <img th:if="${song.coverUrl != null}" th:src="${song.coverUrl}">
+                    <span th:if="${song.coverUrl == null}">🎵</span>
+
+                    <button type="button"
+                            class="play-btn"
+                            th:attr="data-src=${song.fileUrl},aria-label='Phát ' + ${song.title}">
+                        ▶
+                    </button>
+                </div>
                 <div class="song-info">
-                    <div class="song-title" th:text="${song.title()}"></div>
-                    <div class="song-artist" th:text="${song.artist()}"></div>
-                    <span class="song-genre" th:text="${song.genre()}"></span>
+                    <div class="song-title" th:text="${song.title}"></div>
+                    <div class="song-artist" th:text="${song.artist != null and !song.artist.isEmpty()} ? ${song.artist} : 'Chưa rõ ca sĩ'"></div>
+                    <span class="song-genre" th:if="${song.category != null}" th:text="${song.category.name}"></span>
                 </div>
             </div>
         </div>
+
+        <p class="empty-state" th:if="${#lists.isEmpty(songs)}">Chưa có bài hát nào được duyệt để hiển thị.</p>
     </main>
 
 </div>
+
+<!-- Một audio dùng chung cho toàn trang -> không thể có 2 bài phát cùng lúc -->
+<audio id="global-player" preload="none"></audio>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const player = document.getElementById('global-player');
+        let currentBtn = null;
+
+        function resetButton(btn) {
+            btn.classList.remove('playing');
+            btn.textContent = '▶';
+        }
+
+        document.querySelectorAll('.play-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const isThisOnePlaying = btn.classList.contains('playing');
+
+                // Nếu đang có bài khác phát -> tắt icon của nút đó trước
+                if (currentBtn && currentBtn !== btn) {
+                    resetButton(currentBtn);
+                }
+
+                if (isThisOnePlaying) {
+                    player.pause();
+                    resetButton(btn);
+                    currentBtn = null;
+                } else {
+                    player.src = btn.dataset.src;
+                    player.play();
+                    btn.classList.add('playing');
+                    btn.textContent = '⏸';
+                    currentBtn = btn;
+                }
+            });
+        });
+
+        // Bài hát phát xong -> icon tự quay lại trạng thái play
+        player.addEventListener('ended', function () {
+            if (currentBtn) {
+                resetButton(currentBtn);
+                currentBtn = null;
+            }
+        });
+    });
+</script>
+
 </body>
 </html>

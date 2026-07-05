@@ -1,34 +1,37 @@
 package com.code.musicapp.controller;
 
-import com.code.musicapp.dto.SampleSong;
+import com.code.musicapp.entity.Song;
+import com.code.musicapp.entity.SongStatus;
+import com.code.musicapp.repository.SongRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
+@RequiredArgsConstructor
 public class HomeController {
 
-    // Trang chu tam thoi - nguoi 4 (UI) se thay the/mo rong sau
-    // Du lieu mau (hardcode) chi de co giao dien de nhin khi demo,
-    // Nguoi 2 se thay bang du lieu that tu SongRepository khi xong module Song.
+    // So luong bai hat noi bat hien tren trang chu
+    private static final int FEATURED_LIMIT = 8;
+
+    private final SongRepository songRepository;
+
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("songs", sampleSongs());
+        model.addAttribute("songs", featuredSongs());
         return "index";
     }
 
-    private List<SampleSong> sampleSongs() {
-        return List.of(
-                new SampleSong("Chạy Ngay Đi", "Sơn Tùng M-TP", "V-Pop", "🎤"),
-                new SampleSong("Có Chàng Trai Viết Lên Cây", "Phan Mạnh Quỳnh", "Ballad", "🎸"),
-                new SampleSong("Blinding Lights", "The Weeknd", "Synth-Pop", "✨"),
-                new SampleSong("Shape of You", "Ed Sheeran", "Pop", "🎧"),
-                new SampleSong("Lạc Trôi", "Sơn Tùng M-TP", "V-Pop", "🌙"),
-                new SampleSong("Levitating", "Dua Lipa", "Dance-Pop", "💃"),
-                new SampleSong("Waiting For You", "MONO", "V-Pop", "🌊"),
-                new SampleSong("Perfect", "Ed Sheeran", "Ballad", "💍")
-        );
+    // Lay bai hat da duyet (APPROVED), moi nhat truoc, gioi han so luong hien tren trang chu
+    private List<Song> featuredSongs() {
+        return songRepository.findByStatus(SongStatus.APPROVED).stream()
+                .sorted(Comparator.comparing(Song::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(FEATURED_LIMIT)
+                .toList();
     }
 }
+
