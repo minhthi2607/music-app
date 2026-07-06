@@ -525,3 +525,56 @@ th, td {
 
 .play-btn:hover { background: var(--accent); transform: scale(1.08); }
 .play-btn.playing { background: var(--accent); }
+
+/* ===== Them vao playlist (dropdown tren song-card) ===== */
+.add-to-playlist {
+    margin-top: 10px;
+}
+
+.add-to-playlist summary {
+    cursor: pointer;
+    list-style: none;
+}
+
+.add-to-playlist summary::-webkit-details-marker {
+    display: none;
+}
+
+.add-to-playlist-form {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: var(--surface-raised);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.add-to-playlist-form .form-group {
+    margin-bottom: 0;
+}
+
+.add-to-playlist-form select,
+.add-to-playlist-form input[type="text"] {
+    width: 100%;
+}
+
+.add-to-playlist-login {
+    display: inline-block;
+    margin-top: 10px;
+}
+
+/* ===== Phan trang (trang chu) ===== */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 28px;
+}
+
+.pagination-info {
+    color: var(--text-muted);
+    font-size: 13px;
+}

@@ -10,6 +10,7 @@ import com.code.musicapp.repository.PlaylistSongRepository;
 import com.code.musicapp.repository.SongRepository;
 import com.code.musicapp.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -73,6 +74,7 @@ public class PlaylistController {
     }
 
     // ===== XOA CA PLAYLIST =====
+    @Transactional
     @PostMapping("/{id}/delete")
     public String deletePlaylist(@PathVariable Long id, Authentication authentication) {
         Playlist playlist = getOwnedPlaylistOrThrow(id, authentication);
@@ -83,6 +85,7 @@ public class PlaylistController {
 
     // ===== NUT "+" TREN BAI HAT: them vao playlist co san HOAC tao moi ngay tai cho =====
     // Nguoi dung hoac chon 1 playlist co san (playlistId), hoac go ten playlist moi (newPlaylistName).
+    @Transactional
     @PostMapping("/add-song")
     public String addSongToPlaylist(
             @RequestParam Long songId,
@@ -97,14 +100,19 @@ public class PlaylistController {
 
         Playlist playlist;
         if (!playlistId.isBlank()) {
-            Long id = Long.parseLong(playlistId);
+            Long id;
+            try {
+                id = Long.parseLong(playlistId);
+            } catch (NumberFormatException e) {
+                return redirectBackWithParam(request, "/", "playlistError=invalid_playlist");
+            }
             playlist = playlistRepository.findById(id)
                     .filter(p -> p.getOwner().getId().equals(user.getId()))
                     .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay playlist id=" + id));
         } else if (!newPlaylistName.isBlank()) {
             playlist = createPlaylistForUser(user, newPlaylistName);
         } else {
-            return redirectBackWithParam(request, "/songs", "playlistError=empty_name");
+            return redirectBackWithParam(request, "/", "playlistError=empty_name");
         }
 
         if (!playlistSongRepository.existsByPlaylistIdAndSongId(playlist.getId(), song.getId())) {
@@ -114,10 +122,11 @@ public class PlaylistController {
             playlistSongRepository.save(ps);
         }
 
-        return redirectBackWithParam(request, "/songs", "playlistAdded=" + playlist.getId());
+        return redirectBackWithParam(request, "/", "playlistAdded=" + playlist.getId());
     }
 
     // ===== XOA 1 BAI KHOI PLAYLIST (khong xoa bai hat that, chi go khoi playlist) =====
+    @Transactional
     @PostMapping("/{playlistId}/songs/{songId}/remove")
     public String removeSongFromPlaylist(@PathVariable Long playlistId,
                                           @PathVariable Long songId,
@@ -129,9 +138,17 @@ public class PlaylistController {
 
     // ================= HELPER =================
 
+    private static final int MAX_PLAYLIST_NAME_LENGTH = 100;
+
     private Playlist createPlaylistForUser(User user, String name) {
+        String trimmed = name.trim();
+        // @Size(max=100) tren entity khong tu kich hoat vi day la @RequestParam thuong,
+        // khong qua @Valid -> tu cat bot de tranh DataIntegrityViolationException tu DB.
+        if (trimmed.length() > MAX_PLAYLIST_NAME_LENGTH) {
+            trimmed = trimmed.substring(0, MAX_PLAYLIST_NAME_LENGTH);
+        }
         Playlist playlist = new Playlist();
-        playlist.setName(name.trim());
+        playlist.setName(trimmed);
         playlist.setOwner(user);
         return playlistRepository.save(playlist);
     }
