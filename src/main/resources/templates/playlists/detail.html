@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${playlist.name} + ' - Music App'"></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="page-container">
+
+    <div th:replace="~{fragments/layout :: navbar('playlists')}"></div>
+
+    <main>
+        <a th:href="@{/playlists}" class="back-link">← Quay lại Playlist của tôi</a>
+
+        <div class="page-header">
+            <div>
+                <h1 th:text="${playlist.name}"></h1>
+                <p class="page-subtitle" th:text="${#lists.size(items)} + ' bài hát trong playlist này.'"></p>
+            </div>
+        </div>
+
+        <div class="song-grid" th:if="${not #lists.isEmpty(items)}">
+            <div class="song-card" th:each="item : ${items}">
+                <div class="song-cover">
+                    <img th:if="${item.song.coverUrl != null}" th:src="${item.song.coverUrl}">
+                    <span th:if="${item.song.coverUrl == null}">🎵</span>
+
+                    <button type="button"
+                            class="play-btn"
+                            th:attr="data-src=${item.song.fileUrl},aria-label='Phát ' + ${item.song.title}">
+                        ▶
+                    </button>
+                </div>
+                <div class="song-info">
+                    <div class="song-title" th:text="${item.song.title}"></div>
+                    <div class="song-artist"
+                         th:text="${item.song.artist != null and !item.song.artist.isEmpty()} ? ${item.song.artist} : 'Chưa rõ ca sĩ'"></div>
+                    <span class="song-genre" th:if="${item.song.category != null}" th:text="${item.song.category.name}"></span>
+                </div>
+                <form th:action="@{/playlists/{playlistId}/songs/{songId}/remove(playlistId=${playlist.id},songId=${item.song.id})}"
+                      method="post" style="margin-top:10px;"
+                      onsubmit="return confirm('Gỡ bài hát này khỏi playlist?');">
+                    <button type="submit" class="btn btn-sm btn-danger">Gỡ khỏi playlist</button>
+                </form>
+            </div>
+        </div>
+
+        <p class="empty-state" th:if="${#lists.isEmpty(items)}">
+            Playlist này chưa có bài hát nào. Về trang chủ và bấm "+ Thêm vào playlist" để thêm bài hát.
+        </p>
+    </main>
+
+</div>
+
+<!-- Mot audio dung chung cho toan trang -> khong the co 2 bai phat cung luc -->
+<audio id="global-player" preload="none"></audio>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        const player = document.getElementById('global-player');
+        let currentBtn = null;
+
+        function resetButton(btn) {
+            btn.classList.remove('playing');
+            btn.textContent = '▶';
+        }
+
+        document.querySelectorAll('.play-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const isThisOnePlaying = btn.classList.contains('playing');
+
+                if (currentBtn && currentBtn !== btn) {
+                    resetButton(currentBtn);
+                }
+
+                if (isThisOnePlaying) {
+                    player.pause();
+                    resetButton(btn);
+                    currentBtn = null;
+                } else {
+                    player.src = btn.dataset.src;
+                    player.play();
+                    btn.classList.add('playing');
+                    btn.textContent = '⏸';
+                    currentBtn = btn;
+                }
+            });
+        });
+
+        player.addEventListener('ended', function () {
+            if (currentBtn) {
+                resetButton(currentBtn);
+                currentBtn = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

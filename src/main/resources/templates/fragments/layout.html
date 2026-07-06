@@ -16,6 +16,7 @@
         <div sec:authorize="isAuthenticated()">
 <!--            <a sec:authorize="hasRole('ADMIN')" th:href="@{/songs}">Bài hát</a>-->
 <!--            <a sec:authorize="hasRole('ADMIN')" th:href="@{/categories}">Thể loại</a>-->
+            <a th:href="@{/playlists}">Playlist của tôi</a>
             <a th:href="@{/profile}">Hồ sơ</a>
             <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Quản trị</a>
             <span class="nav-greeting">Xin chào, <strong sec:authentication="name"></strong></span>
