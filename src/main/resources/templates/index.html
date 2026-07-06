@@ -43,27 +43,12 @@
                 </div>
 
                 <!-- Them vao playlist: chi hien cho user da dang nhap -->
-                <details class="add-to-playlist" sec:authorize="isAuthenticated()">
-                    <summary class="btn btn-sm btn-secondary">+ Thêm vào playlist</summary>
-                    <form th:action="@{/playlists/add-song}" method="post" class="add-to-playlist-form">
-                        <input type="hidden" name="songId" th:value="${song.id}">
-
-                        <div class="form-group" th:if="${not #lists.isEmpty(userPlaylists)}">
-                            <label>Chọn playlist có sẵn</label>
-                            <select name="playlistId">
-                                <option value="">-- Không chọn --</option>
-                                <option th:each="pl : ${userPlaylists}" th:value="${pl.id}" th:text="${pl.name}"></option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Hoặc tạo playlist mới</label>
-                            <input type="text" name="newPlaylistName" placeholder="Tên playlist mới" maxlength="100">
-                        </div>
-
-                        <button type="submit" class="btn btn-sm btn-primary">Thêm</button>
-                    </form>
-                </details>
+                <button type="button"
+                        class="btn btn-sm btn-secondary open-playlist-modal-btn"
+                        sec:authorize="isAuthenticated()"
+                        th:attr="data-song-id=${song.id},data-song-title=${song.title}">
+                    + Thêm vào playlist
+                </button>
 
                 <a sec:authorize="!isAuthenticated()" th:href="@{/auth/login}" class="btn btn-sm btn-secondary add-to-playlist-login">
                     Đăng nhập để lưu vào playlist
@@ -81,6 +66,38 @@
         </div>
     </main>
 
+</div>
+
+<!-- Popup thêm vào playlist: dùng chung cho tất cả bài hát, JS sẽ điền songId khi mở -->
+<div id="playlist-modal-overlay" class="modal-overlay" sec:authorize="isAuthenticated()">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="playlist-modal-title">
+        <div class="modal-header">
+            <h3 id="playlist-modal-title">Thêm <span id="playlist-modal-song-title"></span> vào playlist</h3>
+            <button type="button" class="modal-close" id="playlist-modal-close" aria-label="Đóng">✕</button>
+        </div>
+
+        <form th:action="@{/playlists/add-song}" method="post" class="add-to-playlist-form">
+            <input type="hidden" name="songId" id="playlist-modal-song-id">
+
+            <div class="form-group" th:if="${not #lists.isEmpty(userPlaylists)}">
+                <label>Chọn playlist có sẵn</label>
+                <select name="playlistId">
+                    <option value="">-- Không chọn --</option>
+                    <option th:each="pl : ${userPlaylists}" th:value="${pl.id}" th:text="${pl.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Hoặc tạo playlist mới</label>
+                <input type="text" name="newPlaylistName" placeholder="Tên playlist mới" maxlength="100">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-sm btn-secondary" id="playlist-modal-cancel">Hủy</button>
+                <button type="submit" class="btn btn-sm btn-primary">Thêm</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Một audio dùng chung cho toàn trang -> không thể có 2 bài phát cùng lúc -->
@@ -125,6 +142,48 @@
                 resetButton(currentBtn);
                 currentBtn = null;
             }
+        });
+
+        // ===== Popup thêm vào playlist =====
+        const modalOverlay = document.getElementById('playlist-modal-overlay');
+        const modalSongIdInput = document.getElementById('playlist-modal-song-id');
+        const modalSongTitle = document.getElementById('playlist-modal-song-title');
+        const modalCloseBtn = document.getElementById('playlist-modal-close');
+        const modalCancelBtn = document.getElementById('playlist-modal-cancel');
+
+        function openPlaylistModal(songId, songTitle) {
+            if (!modalOverlay) return;
+            modalSongIdInput.value = songId;
+            modalSongTitle.textContent = songTitle;
+            modalOverlay.classList.add('open');
+            document.body.classList.add('modal-open');
+        }
+
+        function closePlaylistModal() {
+            if (!modalOverlay) return;
+            modalOverlay.classList.remove('open');
+            document.body.classList.remove('modal-open');
+        }
+
+        document.querySelectorAll('.open-playlist-modal-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                openPlaylistModal(btn.dataset.songId, btn.dataset.songTitle);
+            });
+        });
+
+        if (modalCloseBtn) modalCloseBtn.addEventListener('click', closePlaylistModal);
+        if (modalCancelBtn) modalCancelBtn.addEventListener('click', closePlaylistModal);
+
+        // Bấm ra ngoài vùng popup -> đóng
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', function (e) {
+                if (e.target === modalOverlay) closePlaylistModal();
+            });
+        }
+
+        // Nhấn Esc -> đóng
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closePlaylistModal();
         });
     });
 </script>

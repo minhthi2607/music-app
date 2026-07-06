@@ -526,29 +526,17 @@ th, td {
 .play-btn:hover { background: var(--accent); transform: scale(1.08); }
 .play-btn.playing { background: var(--accent); }
 
-/* ===== Them vao playlist (dropdown tren song-card) ===== */
-.add-to-playlist {
+/* ===== Them vao playlist (nut mo popup tren song-card) ===== */
+.open-playlist-modal-btn {
     margin-top: 10px;
-}
-
-.add-to-playlist summary {
-    cursor: pointer;
-    list-style: none;
-}
-
-.add-to-playlist summary::-webkit-details-marker {
-    display: none;
+    width: 100%;
 }
 
 .add-to-playlist-form {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-sm);
-    background: var(--surface-raised);
+    margin-top: 4px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .add-to-playlist-form .form-group {
@@ -563,6 +551,80 @@ th, td {
 .add-to-playlist-login {
     display: inline-block;
     margin-top: 10px;
+}
+
+/* ===== Popup (modal) thêm vào playlist ===== */
+body.modal-open {
+    overflow: hidden;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 360px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    animation: modal-pop 0.15s ease;
+}
+
+@keyframes modal-pop {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: var(--radius-sm);
+}
+
+.modal-close:hover {
+    color: var(--text);
+    background: var(--surface-hover);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
 }
 
 /* ===== Phan trang (trang chu) ===== */
