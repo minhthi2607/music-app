@@ -1,6 +1,8 @@
 package com.code.musicapp.repository;
 import com.code.musicapp.entity.Song;
 import com.code.musicapp.entity.SongStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -9,6 +11,9 @@ public interface SongRepository extends JpaRepository<Song, Long> {
 
     // Loc bai hat theo trang thai - vd chi hien APPROVED ngoai trang public
     List<Song> findByStatus(SongStatus status);
+
+    // Ban co phan trang - dung cho trang chu (thay the cho viec lay het roi limit trong code)
+    Page<Song> findByStatus(SongStatus status, Pageable pageable);
 
     // Loc theo the loai
     List<Song> findByCategoryId(Long categoryId);

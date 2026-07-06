@@ -18,8 +18,11 @@
                 <h1>Bài hát nổi bật</h1>
                 <p class="page-subtitle">Những bài hát mới được thêm gần đây.</p>
             </div>
-<!--            <a th:href="@{/songs}" class="btn btn-secondary">Xem tất cả bài hát →</a>-->
+            <a sec:authorize="isAuthenticated()" th:href="@{/playlists}" class="btn btn-secondary">🎶 Playlist của tôi →</a>
         </div>
+
+        <p class="success-msg" th:if="${param.playlistAdded != null}">Đã thêm bài hát vào playlist.</p>
+        <p class="error-msg" th:if="${param.playlistError != null}">Không thể thêm bài hát vào playlist. Vui lòng thử lại.</p>
 
         <div class="song-grid" th:if="${not #lists.isEmpty(songs)}">
             <div class="song-card" th:each="song : ${songs}">
@@ -38,10 +41,44 @@
                     <div class="song-artist" th:text="${song.artist != null and !song.artist.isEmpty()} ? ${song.artist} : 'Chưa rõ ca sĩ'"></div>
                     <span class="song-genre" th:if="${song.category != null}" th:text="${song.category.name}"></span>
                 </div>
+
+                <!-- Them vao playlist: chi hien cho user da dang nhap -->
+                <details class="add-to-playlist" sec:authorize="isAuthenticated()">
+                    <summary class="btn btn-sm btn-secondary">+ Thêm vào playlist</summary>
+                    <form th:action="@{/playlists/add-song}" method="post" class="add-to-playlist-form">
+                        <input type="hidden" name="songId" th:value="${song.id}">
+
+                        <div class="form-group" th:if="${not #lists.isEmpty(userPlaylists)}">
+                            <label>Chọn playlist có sẵn</label>
+                            <select name="playlistId">
+                                <option value="">-- Không chọn --</option>
+                                <option th:each="pl : ${userPlaylists}" th:value="${pl.id}" th:text="${pl.name}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hoặc tạo playlist mới</label>
+                            <input type="text" name="newPlaylistName" placeholder="Tên playlist mới" maxlength="100">
+                        </div>
+
+                        <button type="submit" class="btn btn-sm btn-primary">Thêm</button>
+                    </form>
+                </details>
+
+                <a sec:authorize="!isAuthenticated()" th:href="@{/auth/login}" class="btn btn-sm btn-secondary add-to-playlist-login">
+                    Đăng nhập để lưu vào playlist
+                </a>
             </div>
         </div>
 
         <p class="empty-state" th:if="${#lists.isEmpty(songs)}">Chưa có bài hát nào được duyệt để hiển thị.</p>
+
+        <!-- Phan trang -->
+        <div class="pagination" th:if="${totalPages > 1}">
+            <a th:if="${hasPrevious}" th:href="@{/(page=${currentPage - 1})}" class="btn btn-sm btn-secondary">← Trang trước</a>
+            <span class="pagination-info" th:text="'Trang ' + ${currentPage} + ' / ' + ${totalPages}"></span>
+            <a th:if="${hasNext}" th:href="@{/(page=${currentPage + 1})}" class="btn btn-sm btn-secondary">Trang sau →</a>
+        </div>
     </main>
 
 </div>
